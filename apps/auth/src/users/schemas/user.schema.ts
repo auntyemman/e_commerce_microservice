@@ -1,13 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { AbstractDocument } from '@app/common';
+import { Document } from 'mongoose';
+import { RolesEnum } from '../dto/create-user.dto';
+// import { AbstractDocument } from '@app/common';
 
-@Schema({ versionKey: false })
-export class User extends AbstractDocument {
-  @Prop()
+export type UserDocument = User & Document;
+@Schema({ versionKey: false, timestamps: true })
+export class User {
+  @Prop({ trim: true, required: true })
+  username: string;
+
+  @Prop({ trim: true, required: true, lowercase: true })
   email: string;
 
-  @Prop()
+  @Prop({ trim: true, required: true })
   password: string;
+
+  @Prop({ trim: true, required: true, default: RolesEnum.USER })
+  roles: string[];
+
+  @Prop({ trim: true, default: null })
+  avatar: string;
+
+  @Prop({ trim: true, default: null })
+  createdBy: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

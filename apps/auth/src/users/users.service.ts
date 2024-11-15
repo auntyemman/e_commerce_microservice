@@ -1,34 +1,48 @@
 import {
+  BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import { UsersRepository } from './users.repository';
-import { CreateUserRequest } from './dto/create-user.dto';
-import { User } from './schemas/user.schema';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { User, UserDocument } from './schemas/user.schema';
+import { FilterQuery } from 'mongoose';
+import { NOTIFICATIONS_SERVICE } from '../utils';
+import { ClientProxy } from '@nestjs/microservices';
+import { catchError, lastValueFrom, tap } from 'rxjs';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    @Inject('NOTIFICATIONS')
+    private readonly notificationClient: ClientProxy,
+  ) {}
 
-  async createUser(request: CreateUserRequest) {
-    await this.validateCreateUserRequest(request);
-    const user = await this.usersRepository.create({
-      ...request,
-      password: await bcrypt.hash(request.password, 10),
-    });
-    return user;
+  async createUser(createuserDTO: CreateUserDTO) {
+    try {
+      await this.validateCreateUserRequest(createuserDTO);
+      const user = await this.usersRepository.create({
+        ...createuserDTO,
+        password: await hash(createuserDTO.password, 10),
+      });
+      this.sendValidationEmail(user);
+      return user;
+    } catch (error) {
+      throw new UnprocessableEntityException();
+    }
   }
 
-  private async validateCreateUserRequest(request: CreateUserRequest) {
+  private async validateCreateUserRequest(createuserDTO: CreateUserDTO) {
     let user: User;
     try {
       user = await this.usersRepository.findOne({
-        email: request.email,
+        email: createuserDTO.email,
       });
     } catch (err) {}
-
     if (user) {
       throw new UnprocessableEntityException('Email already exists.');
     }
@@ -36,14 +50,19 @@ export class UsersService {
 
   async validateUser(email: string, password: string) {
     const user = await this.usersRepository.findOne({ email });
-    const passwordIsValid = await bcrypt.compare(password, user.password);
+    const passwordIsValid = await compare(password, user.password);
     if (!passwordIsValid) {
       throw new UnauthorizedException('Credentials are not valid.');
     }
     return user;
   }
 
-  async getUser(getUserArgs: Partial<User>) {
+  async getUser(getUserArgs: FilterQuery<UserDocument>) {
     return this.usersRepository.findOne(getUserArgs);
+  }
+
+  // users service publishers
+  private async sendValidationEmail(user: UserDocument) {
+    this.notificationClient.emit('user_created', user);
   }
 }

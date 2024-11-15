@@ -6,10 +6,11 @@ import {
   UpdateQuery,
   SaveOptions,
   Connection,
+  Document,
 } from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
 
-export abstract class AbstractRepository<TDocument extends AbstractDocument> {
+export abstract class AbstractRepository<TDocument extends Document> {
   protected abstract readonly logger: Logger;
 
   constructor(
@@ -20,7 +21,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
   async create(document: any, options?: SaveOptions): Promise<TDocument> {
     const createdDocument = new this.model({
       ...document,
-      _id: new Types.ObjectId(),
     });
     return (
       await createdDocument.save(options)
@@ -31,7 +31,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     const document = await this.model.findOne(filterQuery, {}, { lean: true });
 
     if (!document) {
-      this.logger.warn('Document not found with filterQuery', filterQuery);
+      this.logger.warn('Document not found with filterQuery');
       throw new NotFoundException('Document not found.');
     }
 

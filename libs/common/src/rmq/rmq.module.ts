@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { RmqService } from './rmq.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 export interface RmqModuleOptions {
   name: string;
@@ -16,6 +16,10 @@ export class RmqModule {
     return {
       module: RmqModule,
       imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: './libs/common/.env',
+        }),
         ClientsModule.registerAsync([
           {
             name,

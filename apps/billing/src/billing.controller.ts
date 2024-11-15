@@ -20,5 +20,6 @@ export class BillingController {
   async handleOrderCreated(@Payload() data: any, @Ctx() context: RmqContext) {
     await this.billingService.bill(data);
     this.rmqService.ack(context);
+    console.log('billing triggered---------------')
   }
 }
