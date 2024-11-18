@@ -7,6 +7,8 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { ACCESS_TOKEN_EXPIRATION, NOTIFICATIONS_SERVICE } from './utils';
 import { EmailsModule } from './emails/emails.module';
+import { BullMQModule } from '@app/common';
+// import { NotificationProcessor } from './notifications.processor';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { EmailsModule } from './emails/emails.module';
     RmqModule.register({
       name: NOTIFICATIONS_SERVICE,
     }),
+    // BullMQModule.register('NOTIFICATIONS_QUEUE'),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
