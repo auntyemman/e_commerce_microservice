@@ -4,7 +4,6 @@ import { AuthModule, RmqService } from '@app/common';
 import { RmqOptions } from '@nestjs/microservices';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Worker } from 'bullmq';
 
 async function bootstrap() {
   const app = await NestFactory.create(NotificationsModule);
@@ -15,24 +14,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   const configService = app.get(ConfigService);
   // start microservices
-  await app.startAllMicroservices();
-
-  const worker = new Worker(
-    'NOTIFICATIONS_QUEUE',
-    async (job) => {
-    // This function can also be used if not using decorators
-  }, {
-    connection: { host: 'localhost', port: 6379 },
-  });
-  
-  // Log worker events for debugging
-  worker.on('completed', (job) => {
-    console.log(`Job completed: ${job.id}`);
-  });
-  
-  worker.on('failed', (job, err) => {
-    console.error(`Job failed: ${job.id} with error ${err.message}`);
-  });
+  await app.startAllMicroservices();;
   await app.listen(configService.get('PORT'));
 }
 bootstrap();

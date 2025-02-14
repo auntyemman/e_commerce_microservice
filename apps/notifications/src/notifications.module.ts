@@ -7,7 +7,7 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { ACCESS_TOKEN_EXPIRATION, NOTIFICATIONS_SERVICE } from './utils';
 import { EmailsModule } from './emails/emails.module';
-import { BullMQModule } from '@app/common';
+// import { BullMQModule } from '@app/common';
 // import { NotificationProcessor } from './notifications.processor';
 
 @Module({

@@ -22,7 +22,7 @@ export class UsersController {
     const user = await this.usersService.createUser(body);
     return res.status(201).json({
       status: 'success',
-      message: 'user fetched succesfully',
+      message: 'user created succesfully',
       data: { user },
     });
   }

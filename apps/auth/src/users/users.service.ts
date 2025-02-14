@@ -63,6 +63,6 @@ export class UsersService {
 
   // users service publishers
   private async sendValidationEmail(user: UserDocument) {
-    this.notificationClient.emit('user_created', user);
+    this.notificationClient.emit('user.created', user);
   }
 }

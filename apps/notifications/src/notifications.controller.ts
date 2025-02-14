@@ -13,7 +13,7 @@ export class NotificationsController {
     private readonly emailsService: EmailsService,
   ) {}
 
-  @EventPattern('user_created')
+  @EventPattern('user.created')
   async handleUserCreated(@Payload() data: any, @Ctx() context: RmqContext) {
     try {
       await this.emailsService.emailVerification(data);
